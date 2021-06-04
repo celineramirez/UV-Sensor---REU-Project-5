@@ -1,0 +1,64 @@
+#include "pitches.h"
+
+const int redledPin = 12; // set pin number 12 to red LED 
+const int greenledPin = 13;  //set pin number 13 to green LED
+const int sensorPin = A0; // the number A0 to sensor pin
+
+// Utilizes constants from "pitches.h" to create the sound effect
+int melody[] = {
+  NOTE_E7, NOTE_E7, 0, NOTE_E7,
+  0, NOTE_C7, NOTE_E7, 0,
+  NOTE_G7, 0, 0,  0,
+  NOTE_G6, 0, 0, 0
+};
+
+// Denotes the duration of each note
+int noteDurations[] = {
+  12, 12, 12, 12,
+  12, 12, 12, 12,
+  12, 12, 12, 12,
+  12, 12, 12, 12,
+};
+
+void setup() {
+  Serial.begin(9600);
+  Serial.println("CLEARDATA");
+  Serial.println("LABEL,Time,Timer, Date, X1, Y, X2");
+  pinMode(greenledPin, OUTPUT);   // initialize the green LED pin as an output
+  pinMode(redledPin, OUTPUT);   // initialize the red LED pin as an output
+  pinMode(sensorPin, INPUT);    // initialize the sensor as an input
+}
+
+void loop() {
+  int sensorStatus = analogRead(sensorPin); // read status of the sensor value
+  int sensor_percentage = map(sensorStatus, 0, 1023, 100, 0);
+  Serial.print("DATA, TIME, TIMER, DATE,");
+  Serial.print(sensorStatus);
+  Serial.print(" ,");
+  Serial.print(sensor_percentage);
+  Serial.println(" ,"); 
+  delay(100);
+
+// Calibrate the sensor and assign the values to red and green LED based 
+// on the intensity of the UV radiation
+
+  if (sensorStatus >=970) {
+    digitalWrite(redledPin, LOW);
+    digitalWrite(greenledPin, HIGH);
+  }
+  
+  else if (sensorStatus < 970) {
+    digitalWrite(greenledPin, LOW);
+    digitalWrite(redledPin, HIGH);
+
+    // Plays a tone on loop when high intensity radiation is detected
+    for (int thisNote = 0; thisNote < 16; thisNote++) {
+
+    int noteDuration = 1000 / noteDurations[thisNote];
+    tone(8, melody[thisNote], noteDuration);
+    
+    int pauseBetweenNotes = noteDuration * 1.30;
+    delay(pauseBetweenNotes);
+    }
+  }
+}
